@@ -10,6 +10,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from sklearn.metrics import classification_report, confusion_matrix
 
 # List all files in the 'Images' directory
+# import os
 # for dirname, _, filenames in os.walk('Images'):
 #    for filename in filenames:
 #        print(os.path.join(dirname, filename))
@@ -114,14 +115,15 @@ model.add(Dense(units=24, activation='softmax'))
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 model.summary()
 
-history = model.fit(datagen.flow(x_train, y_train, batch_size=128), epochs=20, validation_data=(x_test, y_test),
+nbr_epochs = 20
+history = model.fit(datagen.flow(x_train, y_train, batch_size=128), epochs=nbr_epochs, validation_data=(x_test, y_test),
                     callbacks=[learning_rate_reduction])
 
 print("La précision du modèle est de ", model.evaluate(x_test, y_test)[1] * 100, "%")
 
 # Analyses après l'entrainement du modèle
 
-epochs = [i for i in range(20)]
+epochs = [i for i in range(nbr_epochs)]
 fig, ax = plt.subplots(1, 2)
 train_acc = history.history['accuracy']
 train_loss = history.history['loss']
@@ -144,10 +146,11 @@ ax[1].set_xlabel("Epochs")
 ax[1].set_ylabel("Loss")
 plt.show()
 
-predictions = model.predict(x_test)
-predictions = np.round(predictions).astype(int)
+predict_x = model.predict(x_test)
+predictions = np.argmax(predict_x, axis=1)
+print(predictions)
 for i in range(len(predictions)):
-    if (predictions[i] >= 9):
+    if predictions[i] >= 9:
         predictions[i] += 1
 predictions[:5]
 classes = ["Class " + str(i) for i in range(25) if i != 9]
@@ -157,12 +160,4 @@ cm = confusion_matrix(y, predictions)
 cm = pd.DataFrame(cm, index=[i for i in range(25) if i != 9], columns=[i for i in range(25) if i != 9])
 plt.figure(figsize=(15, 15))
 sns.heatmap(cm, cmap="Blues", linecolor='black', linewidth=1, annot=True, fmt='')
-
-correct = np.nonzero(predictions == y)[0]
-i = 0
-for c in correct[:6]:
-    plt.subplot(3, 2, i + 1)
-    plt.imshow(x_test[c].reshape(28, 28), cmap="gray", interpolation='none')
-    plt.title("Predicted Class {},Actual Class {}".format(predictions[c], y[c]))
-    plt.tight_layout()
-    i += 1
+plt.show()
