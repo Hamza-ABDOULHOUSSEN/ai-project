@@ -54,9 +54,9 @@ def resize(img_gray):
 # le csv est généré à partir d'un buffer
 # ajoute la ligne correspondant au pixel dans le buffer
 def addrow(buffer, label, pixel):
-  buffer = buffer + str(label) + ","
+  buffer = buffer + str(label)
   for k in range(784):
-    buffer = buffer + str(pixel[k]) + ","
+    buffer = buffer + "," + str(pixel[k])
   buffer = buffer + "\n"
   return buffer
 
