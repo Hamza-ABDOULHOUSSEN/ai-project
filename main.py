@@ -18,6 +18,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 # Loading data
 train_data = pd.read_csv("Images/sign_mnist_train/sign_mnist_train.csv")
 test_data = pd.read_csv("Images/sign_mnist_test/sign_mnist_test.csv")
+new_test_data = pd.read_csv("Images/new_data/new_data.csv")
 # Pour l'analyse
 test = pd.read_csv("Images/sign_mnist_test/sign_mnist_test.csv")
 y = test['label']
@@ -41,8 +42,10 @@ plt.show()
 # On crée un vecteur y des labels des signes
 y_train = train_data['label']
 y_test = test_data['label']
+y_new_test = new_test_data['label']
 del train_data['label']
 del test_data['label']
+del new_test_data['label']
 
 # À l'air de binariser les labels, mais je ne sais pas à quoi ça sert
 from sklearn.preprocessing import LabelBinarizer
@@ -50,18 +53,22 @@ from sklearn.preprocessing import LabelBinarizer
 label_binarizer = LabelBinarizer()
 y_train = label_binarizer.fit_transform(y_train)
 y_test = label_binarizer.fit_transform(y_test)
+y_new_test = label_binarizer.fit_transform(y_new_test)
 
 # On crée un vecteur x des valeurs des pixels des signes
 x_train = train_data.values
 x_test = test_data.values
+x_new_test = new_test_data.values
 
 # On normalise les data
 x_train = x_train / 255
 x_test = x_test / 255
+x_new_test = x_new_test / 255
 
 # On passe les data de 1-D à 3-D comme demandé dans un réseau à convolution(alias CNN)
 x_train = x_train.reshape(-1, 28, 28, 1)
 x_test = x_test.reshape(-1, 28, 28, 1)
+x_new_test = x_new_test.reshape(-1, 28, 28, 1)
 
 # Preview des 10 premières images de train_data
 f, ax = plt.subplots(2, 5)
@@ -120,6 +127,7 @@ history = model.fit(datagen.flow(x_train, y_train, batch_size=128), epochs=nbr_e
                     callbacks=[learning_rate_reduction])
 
 print("La précision du modèle est de ", model.evaluate(x_test, y_test)[1] * 100, "%")
+print("La précision du modèle avec les nouveaux tests est de ", model.evaluate(x_new_test, y_new_test)[1] * 100, "%")
 
 # Analyses après l'entrainement du modèle
 
@@ -159,5 +167,5 @@ print(classification_report(y, predictions, target_names=classes))
 cm = confusion_matrix(y, predictions)
 cm = pd.DataFrame(cm, index=[i for i in range(25) if i != 9], columns=[i for i in range(25) if i != 9])
 plt.figure(figsize=(15, 15))
-sns.heatmap(cm, cmap="Blues", linecolor='black', linewidth=1, annot=True, fmt='')
+sns.heatmap(cm, cmap="Greens", linecolor='black', linewidth=1, annot=True, fmt='')
 plt.show()
